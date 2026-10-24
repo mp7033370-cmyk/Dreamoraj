@@ -1,0 +1,1950 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-[#0a0518] text-[#f3e8ff]">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Dreamora - Roleplay & Histórias Fantásticas de IA</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dream: {
+              bg: '#0a0518',
+              surface: '#150a2a',
+              card: '#241242',
+              cardHover: '#2f1754',
+              accent: '#a855f7',
+              accentGlow: '#c084fc',
+              lilac: '#d8b4fe',
+              text: '#f3e8ff',
+              textMuted: '#a78bfa',
+              border: '#3b1c6e',
+              borderLight: '#5821a8'
+            }
+          },
+          fontFamily: {
+            cinzel: ['Cinzel', 'serif'],
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar & Aesthetics */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0a0518;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #3b1c6e;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a855f7;
+    }
+    .glass-header {
+      background: rgba(21, 10, 42, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .glass-card {
+      background: rgba(36, 18, 66, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+    }
+    .glass-card:hover {
+      border-color: rgba(192, 132, 252, 0.5);
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+    }
+    /* Starfield background animation */
+    #starfield {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* Dynamic Chat Viewport Height for Mobile Keyboards */
+    .chat-container {
+      height: calc(100dvh - 65px);
+    }
+  </style>
+</head>
+<body class="h-full bg-dream-bg text-dream-text font-sans antialiased overflow-x-hidden selection:bg-dream-accent selection:text-white">
+
+  <!-- Background Starfield Canvas -->
+  <canvas id="starfield"></canvas>
+
+  <!-- App Wrapper -->
+  <div id="app" class="relative z-10 flex flex-col min-h-full max-w-5xl mx-auto bg-dream-bg shadow-2xl border-x border-dream-border/30">
+
+    <!-- TOP GLOBAL HEADER -->
+    <header class="sticky top-0 z-30 glass-header border-b border-dream-border px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('explorar')">
+        <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-dream-accent to-purple-900 p-0.5 shadow-lg shadow-purple-900/50 flex items-center justify-center">
+          <i data-lucide="moon" class="w-5 h-5 text-dream-lilac fill-dream-lilac"></i>
+        </div>
+        <div>
+          <h1 class="font-cinzel text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-dream-lilac via-white to-dream-accent">DREAMORA</h1>
+          <p class="text-[10px] text-dream-textMuted tracking-wider font-mono uppercase">Histórias & Roleplay Mágico</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="flex items-center space-x-2">
+        <button onclick="openSettingsModal()" class="p-2 rounded-xl bg-dream-surface border border-dream-border text-dream-lilac hover:bg-dream-card hover:text-white transition" title="Configurações & IA">
+          <i data-lucide="settings" class="w-5 h-5"></i>
+        </button>
+        <button onclick="openPersonaModal()" class="p-2 rounded-xl bg-dream-surface border border-dream-border text-dream-lilac hover:bg-dream-card hover:text-white transition flex items-center space-x-1.5" title="Trocar Persona">
+          <i data-lucide="user-check" class="w-4 h-4 text-dream-accent"></i>
+          <span id="activePersonaHeaderName" class="text-xs font-medium hidden sm:inline">Eu</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT VIEW AREA -->
+    <main class="flex-1 pb-20 overflow-y-auto">
+
+      <!-- TAB 1: EXPLORAR -->
+      <section id="tab-explorar" class="tab-content p-4 space-y-6">
+        <!-- Hero Banner -->
+        <div class="relative rounded-2xl overflow-hidden border border-dream-border bg-gradient-to-r from-purple-950 via-dream-surface to-indigo-950 p-6 shadow-xl">
+          <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-dream-accent/20 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="relative z-10 max-w-lg space-y-2">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-dream-accent/20 text-dream-lilac border border-dream-accent/30">
+              <i data-lucide="sparkles" class="w-3 h-3 mr-1"></i> Biblioteca de Almas & Universos
+            </span>
+            <h2 class="font-cinzel text-2xl sm:text-3xl font-bold text-white leading-tight">Explore diálogos envolventes com personagens de IA</h2>
+            <p class="text-xs sm:text-sm text-dream-textMuted">Entre em reinos sombrios, viva romances de ritmo lento ou desafie vilões sarcásticos em um universo sem limites.</p>
+          </div>
+        </div>
+
+        <!-- Search Bar & Filters -->
+        <div class="space-y-3">
+          <div class="relative">
+            <i data-lucide="search" class="absolute left-3.5 top-3.5 w-5 h-5 text-dream-textMuted"></i>
+            <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Pesquisar por nome, história, universo ou tags..." class="w-full bg-dream-surface border border-dream-border rounded-xl pl-11 pr-10 py-3 text-sm text-dream-text placeholder-dream-textMuted/60 focus:outline-none focus:border-dream-accent focus:ring-1 focus:ring-dream-accent transition" />
+            <button onclick="clearSearch()" id="clearSearchBtn" class="hidden absolute right-3 top-3 text-dream-textMuted hover:text-white">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+
+          <!-- Category Pills / Multi-Tag selector -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs text-dream-textMuted">
+              <span class="font-semibold text-dream-lilac flex items-center gap-1"><i data-lucide="filter" class="w-3.5 h-3.5"></i> Categorias & Tags:</span>
+              <button onclick="resetFilters()" class="hover:text-white underline text-[11px]">Limpar Filtros</button>
+            </div>
+            <div id="tagFiltersContainer" class="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1">
+              <!-- Dynamically Populated Tags -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Character Grid Section -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-cinzel text-lg font-bold text-dream-lilac flex items-center gap-2">
+              <i data-lucide="compass" class="w-5 h-5 text-dream-accent"></i> Personagens em Destaque
+            </h3>
+            <span id="characterCountBadge" class="text-xs bg-dream-card px-2.5 py-1 rounded-full border border-dream-border text-dream-textMuted">0 encontrados</span>
+          </div>
+
+          <div id="characterGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Character Cards Injected Here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: COMUNIDADE -->
+      <section id="tab-comunidade" class="tab-content hidden p-4 space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="font-cinzel text-xl font-bold text-dream-lilac">Mural da Comunidade</h2>
+            <p class="text-xs text-dream-textMuted">Compartilhe logs de roleplay, fanarts e teorias ficionais com os viajantes.</p>
+          </div>
+          <button onclick="openCreatePostModal()" class="px-3 py-2 bg-gradient-to-r from-dream-accent to-purple-800 text-white rounded-xl text-xs font-semibold shadow-lg hover:brightness-110 flex items-center gap-1.5 transition">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Publicar
+          </button>
+        </div>
+
+        <!-- Post Categories -->
+        <div class="flex gap-2 overflow-x-auto pb-1 border-b border-dream-border text-xs">
+          <button onclick="filterFeed('tudo')" class="feed-tab-btn px-3 py-1.5 rounded-lg bg-dream-accent text-white font-medium" data-feed="tudo">Tudo</button>
+          <button onclick="filterFeed('Personagens')" class="feed-tab-btn px-3 py-1.5 rounded-lg bg-dream-surface text-dream-textMuted hover:text-white" data-feed="Personagens">Personagens</button>
+          <button onclick="filterFeed('Histórias/RP')" class="feed-tab-btn px-3 py-1.5 rounded-lg bg-dream-surface text-dream-textMuted hover:text-white" data-feed="Histórias/RP">Histórias & RP</button>
+          <button onclick="filterFeed('Fanarts')" class="feed-tab-btn px-3 py-1.5 rounded-lg bg-dream-surface text-dream-textMuted hover:text-white" data-feed="Fanarts">Fanarts</button>
+        </div>
+
+        <!-- Feed List -->
+        <div id="communityFeedList" class="space-y-4">
+          <!-- Feed Posts Injected Here -->
+        </div>
+      </section>
+
+      <!-- TAB 3: CRIAR PERSONAGEM -->
+      <section id="tab-criar" class="tab-content hidden p-4 max-w-3xl mx-auto space-y-6">
+        <div>
+          <h2 class="font-cinzel text-2xl font-bold text-dream-lilac">Estúdio de Criação de Personagem</h2>
+          <p class="text-xs text-dream-textMuted">Dê vida a seres complexos com cenários, estilos de fala, memórias e diretrizes detalhadas.</p>
+        </div>
+
+        <form id="characterCreateForm" onsubmit="handleSaveCharacter(event)" class="space-y-5 bg-dream-surface p-5 rounded-2xl border border-dream-border">
+          
+          <!-- Avatar & Visual Upload -->
+          <div class="flex flex-col sm:flex-row items-center gap-4 border-b border-dream-border pb-5">
+            <div class="relative group">
+              <div id="avatarPreviewContainer" class="w-28 h-28 rounded-2xl bg-dream-card border-2 border-dashed border-dream-border flex flex-col items-center justify-center overflow-hidden text-dream-textMuted">
+                <i data-lucide="image" class="w-8 h-8 mb-1 opacity-60"></i>
+                <span class="text-[10px]">Imagem</span>
+              </div>
+              <input type="file" id="charAvatarInput" accept="image/*" onchange="previewAvatarUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer" />
+            </div>
+            <div class="space-y-1 text-center sm:text-left flex-1">
+              <h4 class="text-sm font-semibold text-white">Retrato do Personagem</h4>
+              <p class="text-xs text-dream-textMuted">Selecione uma imagem da sua galeria ou cole uma URL abaixo. O corte é quadrado ou retrato.</p>
+              <input type="text" id="charAvatarUrl" onchange="updateAvatarFromUrl(this.value)" placeholder="Ou cole a URL da imagem (https://...)" class="w-full bg-dream-card border border-dream-border rounded-lg px-3 py-1.5 text-xs text-dream-text focus:outline-none focus:border-dream-accent" />
+            </div>
+          </div>
+
+          <!-- Basic Info -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-dream-lilac mb-1">Nome do Personagem *</label>
+              <input type="text" id="charName" required placeholder="Ex: Alistair Vance" class="w-full bg-dream-card border border-dream-border rounded-xl px-3.5 py-2.5 text-sm text-dream-text focus:outline-none focus:border-dream-accent" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-dream-lilac mb-1">Título ou Apelido</label>
+              <input type="text" id="charTitle" placeholder="Ex: O Duque Vampiro de Obsidian Hold" class="w-full bg-dream-card border border-dream-border rounded-xl px-3.5 py-2.5 text-sm text-dream-text focus:outline-none focus:border-dream-accent" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-dream-lilac mb-1">Universo / Universo / Lore</label>
+              <input type="text" id="charUniverse" placeholder="Ex: Reino Sombrio / Alta Fantasia" class="w-full bg-dream-card border border-dream-border rounded-xl px-3.5 py-2.5 text-sm text-dream-text focus:outline-none focus:border-dream-accent" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-dream-lilac mb-1">Classificação / Relação</label>
+              <input type="text" id="charRelation" placeholder="Ex: Rival antigo / Protetor leal" class="w-full bg-dream-card border border-dream-border rounded-xl px-3.5 py-2.5 text-sm text-dream-text focus:outline-none focus:border-dream-accent" />
+            </div>
+          </div>
+
+          <!-- Short Bio -->
+          <div>
+            <label class="block text-xs font-semibold text-dream-lilac mb-1">Descrição Curta (Aparece no Cartão) *</label>
+            <input type="text" id="charShortBio" required placeholder="Resumo de 1 frase fascinante para os cards de exploração..." class="w-full bg-dream-card border border-dream-border rounded-xl px-3.5 py-2.5 text-sm text-dream-text focus:outline-none focus:border-dream-accent" />
+          </div>
+
+          <!-- Deep Lore & Personality -->
+          <div class="space-y-4 pt-2">
+            <div>
+              <label class="block text-xs font-semibold text-dream-lilac mb-1">Personalidade, Virtudes, Defeitos & Contradições</label>
+              <textarea id="charPersonality" rows="3" placeholder="Ex: Sarcástico com desconhecidos, protetor ferrenho daqueles que ama. Guarda um rancor profundo pela família real..." class="w-full bg-dream-card border border-dream-border rounded-xl p-3 text-sm text-dream-text focus:outline-none focus:border-dream-accent"></textarea>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-dream-lilac mb-1">História de Fundo (Backstory & Segredos)</label>
+              <textarea id="charBackstory" rows="3" placeholder="Passado do personagem, traumas, motivações secretas e relacionamentos chave..." class="w-full bg-dream-card border border-dream-border rounded-xl p-3 text-sm text-dream-text focus:outline-none focus:border-dream-accent"></textarea>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-dream-lilac mb-1">Cenário Inicial & Contexto do Roleplay *</label>
+              <textarea id="charScenario" required rows="3" placeholder="Onde a conversa se inicia? Descreva o ambiente, clima e postura do personagem no momento inicial..." class="w-full bg-dream-card border border-dream-border rounded-xl p-3 text-sm text-dream-text focus:outline-none focus:border-dream-accent"></textarea>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-dream-lilac mb-1">Primeira Mensagem do Personagem *</label>
+              <textarea id="charGreeting" required rows="3" placeholder="A fala inicial e ações dramáticas enviadas automaticamente no início do chat..." class="w-full bg-dream-card border border-dream-border rounded-xl p-3 text-sm text-dream-text focus:outline-none focus:border-dream-accent"></textarea>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-dream-lilac mb-1">Estilo de Fala & Regras de Interpretação</label>
+              <textarea id="charSpeechStyle" rows="2" placeholder="Ex: Fala poética, frases curtas, tom provocativo, usa termos arcaicos, narrar ações entre asteriscos (*olha fixamente*)..." class="w-full bg-dream-card border border-dream-border rounded-xl p-3 text-sm text-dream-text focus:outline-none focus:border-dream-accent"></textarea>
+            </div>
+          </div>
+
+          <!-- Multi Tags Selection -->
+          <div>
+            <label class="block text-xs font-semibold text-dream-lilac mb-1">Selecione as Tags (Múltiplas)</label>
+            <div id="creatorTagsContainer" class="flex flex-wrap gap-1.5 p-3 bg-dream-card border border-dream-border rounded-xl max-h-36 overflow-y-auto">
+              <!-- Dynamically Populated Tags Checklist -->
+            </div>
+          </div>
+
+          <!-- Options & Toggles -->
+          <div class="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-dream-border">
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input type="checkbox" id="charIsAdult" class="w-4 h-4 rounded border-dream-border text-dream-accent focus:ring-dream-accent bg-dream-card" />
+              <span class="text-xs text-dream-text font-medium">Conteúdo Adulto / Sombrio (+18)</span>
+            </label>
+
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input type="checkbox" id="charIsPublic" checked class="w-4 h-4 rounded border-dream-border text-dream-accent focus:ring-dream-accent bg-dream-card" />
+              <span class="text-xs text-dream-text font-medium">Visível na Comunidade</span>
+            </label>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center justify-end space-x-3 pt-3">
+            <input type="hidden" id="editingCharId" value="" />
+            <button type="button" onclick="resetCreatorForm()" class="px-4 py-2 rounded-xl bg-dream-card text-dream-textMuted hover:text-white text-xs font-medium">Limpar</button>
+            <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-dream-accent to-purple-800 text-white font-semibold text-xs shadow-lg hover:brightness-110 flex items-center gap-1.5">
+              <i data-lucide="save" class="w-4 h-4"></i> Salvar Personagem
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- TAB 4: MEU PERFIL -->
+      <section id="tab-perfil" class="tab-content hidden p-4 space-y-6">
+        <!-- Profile Header -->
+        <div class="bg-dream-surface border border-dream-border rounded-2xl p-6 relative overflow-hidden shadow-xl">
+          <div class="absolute inset-0 bg-gradient-to-r from-purple-900/30 to-indigo-900/20 pointer-events-none"></div>
+          <div class="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
+            <img id="userProfileAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="Avatar do Usuário" class="w-20 h-20 rounded-2xl object-cover border-2 border-dream-accent shadow-lg" />
+            <div class="space-y-1 flex-1">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h3 id="userProfileName" class="font-cinzel text-xl font-bold text-white">Viajante das Sombras</h3>
+                  <p id="userProfileBio" class="text-xs text-dream-textMuted">Explorador de contos sombrios e criador de almas perdidas.</p>
+                </div>
+                <button onclick="openEditProfileModal()" class="px-3 py-1.5 rounded-xl bg-dream-card border border-dream-border text-dream-lilac text-xs hover:bg-dream-border transition self-center sm:self-start">
+                  Editar Perfil
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Sub-Tabs -->
+        <div class="space-y-4">
+          <div class="flex gap-2 border-b border-dream-border text-xs">
+            <button onclick="switchProfileTab('chats')" class="profile-tab-btn px-4 py-2 border-b-2 border-dream-accent text-dream-lilac font-semibold" data-ptab="chats">Conversas Ativas</button>
+            <button onclick="switchProfileTab('criados')" class="profile-tab-btn px-4 py-2 text-dream-textMuted hover:text-white" data-ptab="criados">Meus Personagens</button>
+            <button onclick="switchProfileTab('favoritos')" class="profile-tab-btn px-4 py-2 text-dream-textMuted hover:text-white" data-ptab="favoritos">Favoritos</button>
+            <button onclick="switchProfileTab('personas')" class="profile-tab-btn px-4 py-2 text-dream-textMuted hover:text-white" data-ptab="personas">Minhas Personas</button>
+          </div>
+
+          <!-- Active Chats Subtab -->
+          <div id="ptab-chats" class="profile-subtab space-y-3">
+            <div id="activeChatsList" class="space-y-2">
+              <!-- Active Chat History Lists -->
+            </div>
+          </div>
+
+          <!-- Created Characters Subtab -->
+          <div id="ptab-criados" class="profile-subtab hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- User Created Characters -->
+          </div>
+
+          <!-- Favorite Characters Subtab -->
+          <div id="ptab-favoritos" class="profile-subtab hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Favorites -->
+          </div>
+
+          <!-- Personas Subtab -->
+          <div id="ptab-personas" class="profile-subtab hidden space-y-3">
+            <div class="flex justify-between items-center">
+              <p class="text-xs text-dream-textMuted">Crie personas de usuário para alterar como os personagens se dirigem a você no roleplay.</p>
+              <button onclick="openCreatePersonaModal()" class="px-3 py-1.5 rounded-xl bg-dream-accent text-white text-xs font-semibold">+ Nova Persona</button>
+            </div>
+            <div id="userPersonasList" class="space-y-2">
+              <!-- Personas list -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- MOBILE / DESKTOP BOTTOM NAVIGATION -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 glass-header border-t border-dream-border max-w-5xl mx-auto">
+      <div class="grid grid-cols-4 h-16">
+        <button onclick="switchTab('explorar')" class="nav-btn flex flex-col items-center justify-center space-y-1 text-dream-lilac" data-tab="explorar">
+          <i data-lucide="compass" class="w-5 h-5"></i>
+          <span class="text-[10px] font-medium">EXPLORAR</span>
+        </button>
+        <button onclick="switchTab('comunidade')" class="nav-btn flex flex-col items-center justify-center space-y-1 text-dream-textMuted hover:text-dream-lilac" data-tab="comunidade">
+          <i data-lucide="users" class="w-5 h-5"></i>
+          <span class="text-[10px] font-medium">COMUNIDADE</span>
+        </button>
+        <button onclick="switchTab('criar')" class="nav-btn flex flex-col items-center justify-center space-y-1 text-dream-textMuted hover:text-dream-lilac" data-tab="criar">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+          <span class="text-[10px] font-medium">CRIAR</span>
+        </button>
+        <button onclick="switchTab('perfil')" class="nav-btn flex flex-col items-center justify-center space-y-1 text-dream-textMuted hover:text-dream-lilac" data-tab="perfil">
+          <i data-lucide="user" class="w-5 h-5"></i>
+          <span class="text-[10px] font-medium">PERFIL</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- ==================== OVERLAYS & MODALS ==================== -->
+
+    <!-- FULLSCREEN CHAT INTERFACE OVERLAY -->
+    <div id="chatOverlay" class="fixed inset-0 z-50 bg-dream-bg hidden flex flex-col max-w-5xl mx-auto">
+      <!-- Chat Header -->
+      <header class="glass-header border-b border-dream-border px-3 py-2.5 flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-2.5">
+          <button onclick="closeChatOverlay()" class="p-2 rounded-xl text-dream-lilac hover:bg-dream-card transition">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+          </button>
+          <img id="chatCharAvatar" src="" alt="" class="w-10 h-10 rounded-xl object-cover border border-dream-accent" />
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h3 id="chatCharName" class="font-cinzel font-bold text-sm text-white"></h3>
+              <span id="chatCharRatingBadge" class="hidden text-[9px] px-1.5 py-0.2 rounded bg-red-950 text-red-300 border border-red-800 font-bold">+18</span>
+            </div>
+            <p id="chatCharUniverse" class="text-[10px] text-dream-textMuted truncate max-w-[150px] sm:max-w-xs"></p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-1.5">
+          <!-- Style Length selector -->
+          <select id="chatNarrativeStyle" onchange="updateNarrativeStyle(this.value)" class="bg-dream-surface border border-dream-border rounded-lg text-[11px] text-dream-lilac px-2 py-1.5 focus:outline-none">
+            <option value="balanced">Estilo: Equilibrado</option>
+            <option value="short">Estilo: Curto & Rápido</option>
+            <option value="detailed">Estilo: Detalhado / RP Romance</option>
+          </select>
+
+          <!-- Chat Options Menu -->
+          <button onclick="toggleChatMenu()" class="p-2 rounded-xl text-dream-lilac hover:bg-dream-card transition relative">
+            <i data-lucide="more-vertical" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Chat Dropdown Menu -->
+      <div id="chatMenuDropdown" class="hidden absolute right-3 top-14 z-50 bg-dream-surface border border-dream-border rounded-xl shadow-2xl p-2 w-48 text-xs space-y-1">
+        <button onclick="clearChatHistory()" class="w-full text-left px-3 py-2 rounded-lg text-red-400 hover:bg-red-950/50 flex items-center gap-2">
+          <i data-lucide="trash-2" class="w-4 h-4"></i> Limpar Histórico
+        </button>
+        <button onclick="openPersonaModal()" class="w-full text-left px-3 py-2 rounded-lg text-dream-textMuted hover:text-white hover:bg-dream-card flex items-center gap-2">
+          <i data-lucide="user-check" class="w-4 h-4"></i> Alterar Persona
+        </button>
+        <button onclick="exportChatLog()" class="w-full text-left px-3 py-2 rounded-lg text-dream-textMuted hover:text-white hover:bg-dream-card flex items-center gap-2">
+          <i data-lucide="download" class="w-4 h-4"></i> Exportar Diálogo
+        </button>
+      </div>
+
+      <!-- Chat Scenario & Persona Bar -->
+      <div class="bg-dream-surface/80 border-b border-dream-border px-4 py-1.5 text-[11px] text-dream-textMuted flex items-center justify-between shrink-0">
+        <span class="truncate max-w-[70%]">Persona ativa: <strong id="chatActivePersonaLabel" class="text-dream-lilac">Eu</strong></span>
+        <button onclick="showScenarioModal()" class="text-dream-accent hover:underline flex items-center gap-1">
+          <i data-lucide="book-open" class="w-3 h-3"></i> Ver Cenário
+        </button>
+      </div>
+
+      <!-- Messages Stream Area -->
+      <div id="chatMessagesStream" class="flex-1 overflow-y-auto p-4 space-y-4">
+        <!-- Dialogue bubbles injected here -->
+      </div>
+
+      <!-- Typing Indicator -->
+      <div id="chatTypingIndicator" class="hidden px-4 py-2 text-xs text-dream-textMuted flex items-center gap-2">
+        <div class="flex space-x-1">
+          <div class="w-1.5 h-1.5 bg-dream-accent rounded-full animate-bounce"></div>
+          <div class="w-1.5 h-1.5 bg-dream-lilac rounded-full animate-bounce [animation-delay:0.2s]"></div>
+          <div class="w-1.5 h-1.5 bg-dream-accent rounded-full animate-bounce [animation-delay:0.4s]"></div>
+        </div>
+        <span id="typingCharName">Personagem pensando no próximo passo...</span>
+      </div>
+
+      <!-- Fixed Chat Input Area -->
+      <footer class="glass-header border-t border-dream-border p-3 shrink-0">
+        <!-- Quick Action Tools -->
+        <div class="flex items-center gap-2 mb-2">
+          <button onclick="handleContinueStory()" class="px-2.5 py-1 rounded-lg bg-dream-surface border border-dream-border text-[11px] text-dream-lilac hover:bg-dream-card flex items-center gap-1 transition">
+            <i data-lucide="sparkles" class="w-3 h-3 text-dream-accent"></i> Continuar Narrativa
+          </button>
+          <button onclick="handleRegenerateResponse()" class="px-2.5 py-1 rounded-lg bg-dream-surface border border-dream-border text-[11px] text-dream-lilac hover:bg-dream-card flex items-center gap-1 transition">
+            <i data-lucide="refresh-cw" class="w-3 h-3"></i> Regenerar Resposta
+          </button>
+        </div>
+
+        <form onsubmit="handleSendChatMessage(event)" class="flex items-end gap-2">
+          <textarea id="chatInputText" rows="1" onkeydown="handleChatKeyDown(event)" placeholder="Escreva sua ação ou fala... (Shift+Enter para nova linha)" class="flex-1 bg-dream-surface border border-dream-border rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-dream-text placeholder-dream-textMuted/60 focus:outline-none focus:border-dream-accent resize-none max-h-32"></textarea>
+          <button type="submit" class="p-3 bg-gradient-to-r from-dream-accent to-purple-800 text-white rounded-xl shadow-lg hover:brightness-110 flex items-center justify-center shrink-0">
+            <i data-lucide="send" class="w-4 h-4"></i>
+          </button>
+        </form>
+      </footer>
+    </div>
+
+    <!-- CHARACTER PROFILE MODAL -->
+    <div id="characterProfileModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-dream-surface border border-dream-border rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 relative space-y-4 shadow-2xl">
+        <button onclick="closeCharacterProfileModal()" class="absolute right-4 top-4 text-dream-textMuted hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <div class="flex items-start gap-4 border-b border-dream-border pb-4">
+          <img id="modalCharAvatar" src="" class="w-20 h-20 rounded-2xl object-cover border-2 border-dream-accent shadow-md" />
+          <div class="space-y-1">
+            <h3 id="modalCharName" class="font-cinzel text-xl font-bold text-white"></h3>
+            <p id="modalCharTitle" class="text-xs text-dream-lilac font-medium"></p>
+            <p id="modalCharUniverse" class="text-[11px] text-dream-textMuted"></p>
+          </div>
+        </div>
+
+        <div class="space-y-3 text-xs text-dream-text">
+          <div>
+            <strong class="text-dream-lilac block font-semibold mb-0.5">Descrição:</strong>
+            <p id="modalCharBio" class="text-dream-textMuted leading-relaxed"></p>
+          </div>
+
+          <div>
+            <strong class="text-dream-lilac block font-semibold mb-0.5">Personalidade:</strong>
+            <p id="modalCharPersonality" class="text-dream-textMuted leading-relaxed"></p>
+          </div>
+
+          <div>
+            <strong class="text-dream-lilac block font-semibold mb-0.5">Cenário Inicial:</strong>
+            <p id="modalCharScenario" class="text-dream-textMuted italic bg-dream-card p-2.5 rounded-xl border border-dream-border/50"></p>
+          </div>
+
+          <div>
+            <strong class="text-dream-lilac block font-semibold mb-1">Tags:</strong>
+            <div id="modalCharTags" class="flex flex-wrap gap-1"></div>
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end space-x-3">
+          <button onclick="toggleFavoriteCharacterModal()" id="modalFavBtn" class="px-3 py-2 rounded-xl bg-dream-card border border-dream-border text-xs text-dream-lilac flex items-center gap-1.5">
+            <i data-lucide="heart" class="w-4 h-4"></i> Favoritar
+          </button>
+          <button onclick="startChatFromModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-dream-accent to-purple-800 text-white font-semibold text-xs shadow-lg hover:brightness-110 flex items-center gap-1.5">
+            <i data-lucide="message-square" class="w-4 h-4"></i> Iniciar Chat
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS & AI API MODAL -->
+    <div id="settingsModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-dream-surface border border-dream-border rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl relative">
+        <button onclick="closeSettingsModal()" class="absolute right-4 top-4 text-dream-textMuted hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <h3 class="font-cinzel text-lg font-bold text-dream-lilac flex items-center gap-2">
+          <i data-lucide="settings" class="w-5 h-5 text-dream-accent"></i> Configurações & Preferências
+        </h3>
+
+        <!-- Content Rating Settings -->
+        <div class="space-y-3 bg-dream-card p-3.5 rounded-xl border border-dream-border">
+          <h4 class="text-xs font-semibold text-white uppercase tracking-wider">Preferências de Conteúdo</h4>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs text-dream-text font-medium block">Conteúdo Adulto / Sombrio (+18)</span>
+              <span class="text-[10px] text-dream-textMuted">Permite acessar e criar conteúdos adultos ficionais.</span>
+            </div>
+            <input type="checkbox" id="settingAdultToggle" onchange="toggleAdultPreference(this.checked)" class="w-4 h-4 rounded border-dream-border text-dream-accent focus:ring-dream-accent" />
+          </div>
+
+          <div class="flex items-center justify-between pt-2 border-t border-dream-border/50">
+            <div>
+              <span class="text-xs text-dream-text font-medium block">Palavrões & Linguagem Intensa</span>
+              <span class="text-[10px] text-dream-textMuted">Permite linguagem informal/profana em contextos dramáticos.</span>
+            </div>
+            <input type="checkbox" id="settingProfanityToggle" checked class="w-4 h-4 rounded border-dream-border text-dream-accent focus:ring-dream-accent" />
+          </div>
+        </div>
+
+        <!-- AI Key Settings -->
+        <div class="space-y-3 bg-dream-card p-3.5 rounded-xl border border-dream-border">
+          <h4 class="text-xs font-semibold text-white uppercase tracking-wider">Conexão com Inteligência Artificial</h4>
+          <p class="text-[10px] text-dream-textMuted">
+            O Dreamora é <strong>100% gratuito</strong> e inclui uma IA local de simulação narrativa. Se desejar usar respostas em tempo real de uma API externa (ex: Google Gemini API), cole sua chave abaixo.
+          </p>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-dream-lilac mb-1">Chave Gemini API (Opcional)</label>
+            <input type="password" id="geminiApiKeyInput" placeholder="Cole sua chave AIzaSy..." class="w-full bg-dream-surface border border-dream-border rounded-lg px-3 py-2 text-xs text-dream-text focus:outline-none focus:border-dream-accent" />
+          </div>
+        </div>
+
+        <!-- Backup Data -->
+        <div class="flex justify-between items-center pt-2">
+          <button onclick="exportAllData()" class="text-xs text-dream-lilac hover:underline flex items-center gap-1">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i> Exportar Backup
+          </button>
+          <button onclick="saveSettings()" class="px-4 py-2 bg-dream-accent text-white rounded-xl text-xs font-semibold hover:brightness-110">
+            Salvar Preferências
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERSONA MODAL -->
+    <div id="personaModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-dream-surface border border-dream-border rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl relative">
+        <button onclick="closePersonaModal()" class="absolute right-4 top-4 text-dream-textMuted hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <h3 class="font-cinzel text-lg font-bold text-dream-lilac">Selecionar Persona do Usuário</h3>
+        <p class="text-xs text-dream-textMuted">Selecione qual identidade você assumirá nas conversas.</p>
+
+        <div id="personaModalList" class="space-y-2 max-h-60 overflow-y-auto">
+          <!-- Personas items -->
+        </div>
+
+        <div class="flex justify-between pt-2 border-t border-dream-border">
+          <button onclick="openCreatePersonaModal()" class="text-xs text-dream-accent hover:underline">+ Criar Nova Persona</button>
+          <button onclick="closePersonaModal()" class="px-4 py-1.5 bg-dream-card border border-dream-border text-xs rounded-xl">Concluído</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CREATE PERSONA MODAL -->
+    <div id="createPersonaModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-dream-surface border border-dream-border rounded-2xl max-w-md w-full p-5 space-y-3 shadow-2xl relative">
+        <button onclick="closeCreatePersonaModal()" class="absolute right-4 top-4 text-dream-textMuted hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <h3 class="font-cinzel text-lg font-bold text-dream-lilac">Nova Persona do Usuário</h3>
+
+        <div>
+          <label class="block text-xs font-semibold text-dream-lilac mb-1">Nome da Persona *</label>
+          <input type="text" id="personaNameInput" placeholder="Ex: Príncipe Solitário / Caçadora de Vampiros" class="w-full bg-dream-card border border-dream-border rounded-xl px-3 py-2 text-xs text-dream-text focus:outline-none focus:border-dream-accent" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-dream-lilac mb-1">Aparência & Como a IA deve ver você</label>
+          <textarea id="personaBioInput" rows="3" placeholder="Ex: Cabelos prateados, veste armadura de obsidiana, postura firme..." class="w-full bg-dream-card border border-dream-border rounded-xl p-3 text-xs text-dream-text focus:outline-none focus:border-dream-accent"></textarea>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button onclick="handleSavePersona()" class="px-4 py-2 bg-dream-accent text-white text-xs font-semibold rounded-xl hover:brightness-110">Salvar Persona</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CREATE COMMUNITY POST MODAL -->
+    <div id="createPostModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-dream-surface border border-dream-border rounded-2xl max-w-md w-full p-5 space-y-3 shadow-2xl relative">
+        <button onclick="closeCreatePostModal()" class="absolute right-4 top-4 text-dream-textMuted hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <h3 class="font-cinzel text-lg font-bold text-dream-lilac">Criar Publicação na Comunidade</h3>
+
+        <div>
+          <label class="block text-xs font-semibold text-dream-lilac mb-1">Categoria</label>
+          <select id="postCategorySelect" class="w-full bg-dream-card border border-dream-border rounded-xl px-3 py-2 text-xs text-dream-text focus:outline-none">
+            <option value="Histórias/RP">Histórias & RP</option>
+            <option value="Personagens">Personagens</option>
+            <option value="Fanarts">Fanarts</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-dream-lilac mb-1">Vincular Personagem (Opcional)</label>
+          <select id="postCharSelect" class="w-full bg-dream-card border border-dream-border rounded-xl px-3 py-2 text-xs text-dream-text focus:outline-none">
+            <option value="">Nenhum personagem vinculado</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-dream-lilac mb-1">Conteúdo da Publicação *</label>
+          <textarea id="postContentInput" rows="4" placeholder="Compartilhe um trecho da sua história, teoria ou fanart..." class="w-full bg-dream-card border border-dream-border rounded-xl p-3 text-xs text-dream-text focus:outline-none focus:border-dream-accent"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-dream-lilac mb-1">URL de Imagem / Fanart (Opcional)</label>
+          <input type="text" id="postImageUrlInput" placeholder="https://..." class="w-full bg-dream-card border border-dream-border rounded-xl px-3 py-2 text-xs text-dream-text focus:outline-none focus:border-dream-accent" />
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button onclick="handleSaveCommunityPost()" class="px-5 py-2 bg-dream-accent text-white text-xs font-semibold rounded-xl hover:brightness-110">Publicar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENARIO DISPLAY MODAL -->
+    <div id="scenarioModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-dream-surface border border-dream-border rounded-2xl max-w-md w-full p-5 space-y-3 shadow-2xl relative">
+        <button onclick="closeScenarioModal()" class="absolute right-4 top-4 text-dream-textMuted hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+
+        <h3 class="font-cinzel text-lg font-bold text-dream-lilac">Cenário do Roleplay</h3>
+        <p id="scenarioModalText" class="text-xs text-dream-text leading-relaxed bg-dream-card p-3 rounded-xl border border-dream-border/60"></p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- JAVASCRIPT APPLICATION LOGIC -->
+  <script>
+    /* ==========================================================================
+       DREAMORA CORE ENGINE & LOCAL STORAGE ARCHITECTURE
+       ========================================================================== */
+
+    // All Tags Preset Taxonomy
+    const CATEGORY_TAGS = [
+      "Romance", "Dark Romance", "Fantasia", "Manhwa", "Anime", "RPG", 
+      "Terror", "Mistério", "Drama", "Aventura", "Enemies to Lovers", 
+      "Slow Burn", "Reencarnação", "Regressão", "Vilão", "Príncipe", 
+      "Vampiro", "Tsundere", "Sarcástico", "Misterioso"
+    ];
+
+    // Initial Preloaded Gothic & Fantasy Characters
+    const DEFAULT_CHARACTERS = [
+      {
+        id: "char-alistair-vance",
+        name: "Alistair Vance",
+        title: "O Duque Vampiro de Obsidian Hold",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+        universe: "Reino Sombrio / Alta Fantasia",
+        relation: "Inimigos forçados a uma aliança de sangue",
+        shortBio: "Imortal e reservado, Alistair rege um ducado gótico sob a noite perpétua. Ele esconde um segredo ancestral por trás do olhar frio.",
+        personality: "Sarcástico, elegante, implacável com inimigos, mas altamente protetor. Evita demonstrar fraquezas.",
+        backstory: "Comanda Obsidian Hold há mais de três séculos. Foi traído pela antiga guilda e jurou nunca mais confiar em humanos de sangue nobre.",
+        scenario: "Vocês estão trancados no grande salão de obsidian enquanto uma tempestade de neve sombria consome o castelo do lado de fora. O fogo da lareira crepita suavemente.",
+        greeting: "*Alistair ajusta as abotoaduras de prata em suas vestes de veludo escuro e observa você com um olhar gélido, levantando a taça de vinho encorpado.* — Você cruza os meus portões sem convite e ainda espera misericórdia, humano?",
+        speechStyle: "Ações entre asteriscos (*), tom sofisticado, poético e firme.",
+        tags: ["Dark Romance", "Vampiro", "Enemies to Lovers", "Sarcástico", "Fantasia"],
+        isAdult: true,
+        isPublic: true,
+        isDefault: true
+      },
+      {
+        id: "char-seraphina-frost",
+        name: "Seraphina Frost",
+        title: "A Feiticeira Regressada",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+        universe: "Império de Aethelgard",
+        relation: "Aliada estratégica & Mestra de Magia",
+        shortBio: "Regressou 10 anos no tempo após ser executada injustamente. Agora, usa seu conhecimento do futuro para reescrever o destino.",
+        personality: "Misteriosa, estrategista genial, debochada quando provada, profundamente leal a quem ganha sua confiança.",
+        backstory: "Na vida anterior, foi traída pela torre de magos. Agora tem a chance de reordenar o império antes da tragédia.",
+        scenario: "Na biblioteca proibida iluminada por cristais flutuantes, Seraphina folheia um grimório antigo enquanto o observa atentamente.",
+        greeting: "*Seraphina fecha o grimório bruscamente com um estalo e apoia o queixo nas mãos, sorrindo de canto com ar intrigado.* — Interessante... Na minha vida passada, você não deveria estar nesta sala a esta hora. O que você mudou?",
+        speechStyle: "Ações entre asteriscos (*), tom seguro, inteligente e ligeiramente brincalhão.",
+        tags: ["Regressão", "Manhwa", "Fantasia", "Misterioso", "Tsundere"],
+        isAdult: false,
+        isPublic: true,
+        isDefault: true
+      },
+      {
+        id: "char-kaelen-ember",
+        name: "Kaelen Ember",
+        title: "O Príncipe Banido de Ash",
+        avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+        universe: "Reino de Ash & Fogo",
+        relation: "Guarda-costas forçado",
+        shortBio: "Um príncipe guerreiro banido que vaga pelas fronteiras góticas buscando redimir seu nome e retomar o trono dourado.",
+        personality: "Tsundere clássico, orgulhoso, forte senso de honra, fica facilmente envergonhado com demonstrações de afeto.",
+        backstory: "Acusado falsamente de traição pelo seu meio-irmão. Vaga no exílio acumulando força e cicatrizes.",
+        scenario: "Ao redor de uma fogueira no acampamento na Floresta dos Sussurros, Kaelen afia sua espada de aço negro sob o luar.",
+        greeting: "*Kaelen limpa a lâmina com um pano e nem se da ao trabalho de olhar para você imediatamente, embainhando a espada com firmeza.* — Não pense que por estarmos viajando juntos eu vou hesitar se você se tornar um fardo. Fique atento.",
+        speechStyle: "Direto, orgulhoso e contido.",
+        tags: ["Príncipe", "Tsundere", "Slow Burn", "Aventura", "RPG"],
+        isAdult: false,
+        isPublic: true,
+        isDefault: true
+      },
+      {
+        id: "char-nyx-entity",
+        name: "Nyx",
+        title: "A Entidade do Vazio",
+        avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
+        universe: "Dimensão Etérea",
+        relation: "Sombra Acompanhante",
+        shortBio: "Uma presença mágica amorfa que toma forma humana para compreender emoções morais.",
+        personality: "Curiosa, enigmática, imprevisível, faz perguntas profundas e filosóficas.",
+        backstory: "Surgiu da fratura das estrelas e foi atraída pela alma do usuário.",
+        scenario: "Num templo de mármore partido flutuando sobre um oceano de estrelas lilás.",
+        greeting: "*Uma névoa roxa reluzente se condensa na figura de uma jovem de olhos prateados que flutua a poucos centímetros do chão.* — O que é o calor que vocês humanos chamam de afeto? Mostre-me.",
+        speechStyle: "Aéreo, filosófico, curioso.",
+        tags: ["Misterioso", "Terror", "RPG", "Fantasia"],
+        isAdult: false,
+        isPublic: true,
+        isDefault: true
+      }
+    ];
+
+    // Initial Community Posts
+    const DEFAULT_POSTS = [
+      {
+        id: "post-1",
+        authorName: "AstralWanderer",
+        authorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+        category: "Histórias/RP",
+        charId: "char-alistair-vance",
+        charName: "Alistair Vance",
+        content: "A aliança de sangue com o Duque Alistair tomou um rumo surreal no castelo de Obsidian! Conseguimos escapar da névoa sombria, mas ele revelou a marca do pacto ancestral no braço...",
+        imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80",
+        likes: 24,
+        isLiked: false
+      },
+      {
+        id: "post-2",
+        authorName: "LunaScribe",
+        authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+        category: "Personagens",
+        charId: "char-seraphina-frost",
+        charName: "Seraphina Frost",
+        content: "A Seraphina é simplesmente a melhor feiticeira de regressão que já joguei. Os diálogos inteligentes e as reações às escolhas passadas são impecáveis!",
+        imageUrl: "",
+        likes: 18,
+        isLiked: false
+      }
+    ];
+
+    // Initial Default Personas
+    const DEFAULT_PERSONAS = [
+      { id: "persona-default", name: "Eu (Viajante)", bio: "Aparência misteriosa, capa escura, viajante solitário de terras distantes." }
+    ];
+
+    // Application State
+    let appState = {
+      characters: [],
+      favorites: [],
+      personas: [],
+      activePersonaId: "persona-default",
+      communityPosts: [],
+      activeTab: "explorar",
+      activeFeedCategory: "tudo",
+      activeProfileSubtab: "chats",
+      selectedTags: [],
+      searchQuery: "",
+      // Active Chat State
+      activeChatCharId: null,
+      chats: {}, // key: charId, value: { history: [], narrativeStyle: 'balanced' }
+      // Settings
+      settings: {
+        allowAdult: false,
+        allowProfanity: true,
+        geminiApiKey: ""
+      },
+      userProfile: {
+        name: "Viajante das Sombras",
+        bio: "Explorador de contos sombrios e criador de almas perdidas.",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
+      }
+    };
+
+    /* ==========================================================================
+       INITIALIZATION & STORAGE LOGIC
+       ========================================================================== */
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initStarfieldCanvas();
+      loadStateFromStorage();
+      renderTagFilters();
+      renderCreatorTagChecklist();
+      renderCharacters();
+      renderCommunityFeed();
+      renderProfileView();
+      lucide.createIcons();
+    });
+
+    function loadStateFromStorage() {
+      try {
+        const saved = localStorage.getItem('dreamora_app_state');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          appState.characters = parsed.characters && parsed.characters.length ? parsed.characters : DEFAULT_CHARACTERS;
+          appState.favorites = parsed.favorites || [];
+          appState.personas = parsed.personas && parsed.personas.length ? parsed.personas : DEFAULT_PERSONAS;
+          appState.activePersonaId = parsed.activePersonaId || "persona-default";
+          appState.communityPosts = parsed.communityPosts || DEFAULT_POSTS;
+          appState.chats = parsed.chats || {};
+          appState.settings = parsed.settings || appState.settings;
+          appState.userProfile = parsed.userProfile || appState.userProfile;
+        } else {
+          appState.characters = DEFAULT_CHARACTERS;
+          appState.personas = DEFAULT_PERSONAS;
+          appState.communityPosts = DEFAULT_POSTS;
+        }
+      } catch (e) {
+        console.error("Erro ao carregar do localStorage:", e);
+        appState.characters = DEFAULT_CHARACTERS;
+        appState.personas = DEFAULT_PERSONAS;
+      }
+      
+      // Update UI matching settings
+      document.getElementById('settingAdultToggle').checked = appState.settings.allowAdult;
+      document.getElementById('settingProfanityToggle').checked = appState.settings.allowProfanity;
+      document.getElementById('geminiApiKeyInput').value = appState.settings.geminiApiKey || "";
+      updateActivePersonaHeader();
+    }
+
+    function saveStateToStorage() {
+      try {
+        localStorage.setItem('dreamora_app_state', JSON.stringify({
+          characters: appState.characters,
+          favorites: appState.favorites,
+          personas: appState.personas,
+          activePersonaId: appState.activePersonaId,
+          communityPosts: appState.communityPosts,
+          chats: appState.chats,
+          settings: appState.settings,
+          userProfile: appState.userProfile
+        }));
+      } catch (e) {
+        console.error("Erro ao salvar no localStorage:", e);
+      }
+    }
+
+    /* ==========================================================================
+       NAVIGATION & TABS
+       ========================================================================== */
+
+    function switchTab(tabName) {
+      appState.activeTab = tabName;
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+      // Update navbar styling
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+          btn.classList.remove('text-dream-textMuted');
+          btn.classList.add('text-dream-lilac');
+        } else {
+          btn.classList.remove('text-dream-lilac');
+          btn.classList.add('text-dream-textMuted');
+        }
+      });
+
+      if (tabName === 'perfil') {
+        renderProfileView();
+      } else if (tabName === 'comunidade') {
+        renderCommunityFeed();
+      }
+    }
+
+    /* ==========================================================================
+       EXPLORAR & SEARCH ENGINE
+       ========================================================================== */
+
+    function renderTagFilters() {
+      const container = document.getElementById('tagFiltersContainer');
+      container.innerHTML = CATEGORY_TAGS.map(tag => {
+        const isSelected = appState.selectedTags.includes(tag);
+        return `
+          <button onclick="toggleTagFilter('${tag}')" class="px-2.5 py-1 rounded-full text-xs transition border ${
+            isSelected 
+              ? 'bg-dream-accent text-white border-dream-accent shadow-sm' 
+              : 'bg-dream-surface text-dream-textMuted border-dream-border hover:border-dream-lilac'
+          }">
+            ${tag}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function toggleTagFilter(tag) {
+      if (appState.selectedTags.includes(tag)) {
+        appState.selectedTags = appState.selectedTags.filter(t => t !== tag);
+      } else {
+        appState.selectedTags.push(tag);
+      }
+      renderTagFilters();
+      renderCharacters();
+    }
+
+    function resetFilters() {
+      appState.selectedTags = [];
+      appState.searchQuery = "";
+      document.getElementById('searchInput').value = "";
+      document.getElementById('clearSearchBtn').classList.add('hidden');
+      renderTagFilters();
+      renderCharacters();
+    }
+
+    function handleSearch() {
+      const val = document.getElementById('searchInput').value.trim().toLowerCase();
+      appState.searchQuery = val;
+      document.getElementById('clearSearchBtn').classList.toggle('hidden', val === "");
+      renderCharacters();
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = "";
+      appState.searchQuery = "";
+      document.getElementById('clearSearchBtn').classList.add('hidden');
+      renderCharacters();
+    }
+
+    function renderCharacters() {
+      const grid = document.getElementById('characterGrid');
+      
+      const filtered = appState.characters.filter(char => {
+        // Adult Content Check
+        if (char.isAdult && !appState.settings.allowAdult) return false;
+
+        // Search Match
+        const query = appState.searchQuery;
+        const matchesQuery = !query || 
+          char.name.toLowerCase().includes(query) ||
+          char.shortBio.toLowerCase().includes(query) ||
+          char.universe.toLowerCase().includes(query) ||
+          char.tags.some(t => t.toLowerCase().includes(query));
+
+        // Tag Match (All selected must match)
+        const matchesTags = appState.selectedTags.length === 0 ||
+          appState.selectedTags.every(t => char.tags.includes(t));
+
+        return matchesQuery && matchesTags;
+      });
+
+      document.getElementById('characterCountBadge').textContent = `${filtered.length} encontrados`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-12 text-center text-dream-textMuted space-y-2">
+            <i data-lucide="ghost" class="w-10 h-10 mx-auto text-dream-border"></i>
+            <p class="text-sm">Nenhum personagem encontrado para estes filtros.</p>
+            <button onclick="resetFilters()" class="text-xs text-dream-accent hover:underline">Limpar busca e filtros</button>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      grid.innerHTML = filtered.map(char => {
+        const isFav = appState.favorites.includes(char.id);
+        return `
+          <div class="glass-card rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1">
+            <div>
+              <div class="relative h-44 overflow-hidden bg-dream-card">
+                <img src="${char.avatar}" alt="${char.name}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'" />
+                <div class="absolute inset-0 bg-gradient-to-t from-dream-card via-transparent to-black/30"></div>
+                
+                <button onclick="toggleFavorite('${char.id}', event)" class="absolute top-2.5 right-2.5 p-2 rounded-full bg-black/50 text-white backdrop-blur-md hover:scale-110 transition">
+                  <i data-lucide="heart" class="w-4 h-4 ${isFav ? 'fill-dream-accent text-dream-accent' : ''}"></i>
+                </button>
+
+                ${char.isAdult ? '<span class="absolute top-2.5 left-2.5 text-[10px] font-bold bg-red-950/80 border border-red-800 text-red-300 px-2 py-0.5 rounded-full">18+</span>' : ''}
+
+                <div class="absolute bottom-2.5 left-3 right-3">
+                  <h4 class="font-cinzel font-bold text-base text-white leading-tight">${char.name}</h4>
+                  <p class="text-[11px] text-dream-lilac truncate">${char.title || char.universe}</p>
+                </div>
+              </div>
+
+              <div class="p-3.5 space-y-2.5">
+                <p class="text-xs text-dream-textMuted line-clamp-2 leading-relaxed">${char.shortBio}</p>
+
+                <div class="flex flex-wrap gap-1">
+                  ${char.tags.slice(0, 3).map(t => `<span class="text-[10px] bg-dream-surface text-dream-lilac border border-dream-border px-2 py-0.5 rounded-md">${t}</span>`).join('')}
+                  ${char.tags.length > 3 ? `<span class="text-[10px] text-dream-textMuted self-center">+${char.tags.length - 3}</span>` : ''}
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3.5 pt-0 flex gap-2">
+              <button onclick="openCharacterProfile('${char.id}')" class="flex-1 py-2 rounded-xl bg-dream-surface border border-dream-border text-xs font-semibold text-dream-lilac hover:bg-dream-card transition">
+                Perfil & Lore
+              </button>
+              <button onclick="openChatOverlay('${char.id}')" class="flex-1 py-2 rounded-xl bg-gradient-to-r from-dream-accent to-purple-800 text-white text-xs font-semibold shadow-md hover:brightness-110 flex items-center justify-center gap-1 transition">
+                <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Chat
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function toggleFavorite(charId, e) {
+      if (e) e.stopPropagation();
+      if (appState.favorites.includes(charId)) {
+        appState.favorites = appState.favorites.filter(id => id !== charId);
+      } else {
+        appState.favorites.push(charId);
+      }
+      saveStateToStorage();
+      renderCharacters();
+    }
+
+    /* ==========================================================================
+       CHARACTER PROFILE MODAL
+       ========================================================================== */
+
+    let modalCharId = null;
+
+    function openCharacterProfile(charId) {
+      const char = appState.characters.find(c => c.id === charId);
+      if (!char) return;
+
+      modalCharId = charId;
+      document.getElementById('modalCharAvatar').src = char.avatar;
+      document.getElementById('modalCharName').textContent = char.name;
+      document.getElementById('modalCharTitle').textContent = char.title || "";
+      document.getElementById('modalCharUniverse').textContent = `Universo: ${char.universe || 'Livre'}`;
+      document.getElementById('modalCharBio').textContent = char.shortBio + "\n\n" + (char.backstory || "");
+      document.getElementById('modalCharPersonality').textContent = char.personality || "Não especificada.";
+      document.getElementById('modalCharScenario').textContent = char.scenario || "Cenário padrão de boas-vindas.";
+      
+      document.getElementById('modalCharTags').innerHTML = char.tags.map(t => 
+        `<span class="text-[10px] bg-dream-card text-dream-lilac border border-dream-border px-2 py-0.5 rounded-md">${t}</span>`
+      ).join('');
+
+      const isFav = appState.favorites.includes(charId);
+      document.getElementById('modalFavBtn').innerHTML = `<i data-lucide="heart" class="w-4 h-4 ${isFav ? 'fill-dream-accent text-dream-accent' : ''}"></i> ${isFav ? 'Favoritado' : 'Favoritar'}`;
+
+      document.getElementById('characterProfileModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeCharacterProfileModal() {
+      document.getElementById('characterProfileModal').classList.add('hidden');
+    }
+
+    function toggleFavoriteCharacterModal() {
+      if (!modalCharId) return;
+      toggleFavorite(modalCharId);
+      openCharacterProfile(modalCharId);
+    }
+
+    function startChatFromModal() {
+      closeCharacterProfileModal();
+      if (modalCharId) {
+        openChatOverlay(modalCharId);
+      }
+    }
+
+    /* ==========================================================================
+       TAB 3: CRIAR PERSONAGEM STUDIO
+       ========================================================================== */
+
+    function renderCreatorTagChecklist() {
+      const container = document.getElementById('creatorTagsContainer');
+      container.innerHTML = CATEGORY_TAGS.map(tag => `
+        <label class="flex items-center space-x-1.5 px-2 py-1 bg-dream-surface rounded-lg border border-dream-border text-xs text-dream-text hover:border-dream-accent cursor-pointer">
+          <input type="checkbox" name="creatorTags" value="${tag}" class="w-3.5 h-3.5 rounded border-dream-border text-dream-accent focus:ring-dream-accent bg-dream-card" />
+          <span>${tag}</span>
+        </label>
+      `).join('');
+    }
+
+    function previewAvatarUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          updateAvatarPreview(e.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function updateAvatarFromUrl(url) {
+      if (url) updateAvatarPreview(url);
+    }
+
+    function updateAvatarPreview(src) {
+      const container = document.getElementById('avatarPreviewContainer');
+      container.innerHTML = `<img src="${src}" class="w-full h-full object-cover" />`;
+      container.dataset.avatarSrc = src;
+    }
+
+    function handleSaveCharacter(e) {
+      e.preventDefault();
+
+      const editingId = document.getElementById('editingCharId').value;
+      const avatarSrc = document.getElementById('avatarPreviewContainer').dataset.avatarSrc || 
+                        document.getElementById('charAvatarUrl').value || 
+                        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+
+      const selectedTags = Array.from(document.querySelectorAll('input[name="creatorTags"]:checked')).map(el => el.value);
+
+      const newChar = {
+        id: editingId || `char-custom-${Date.now()}`,
+        name: document.getElementById('charName').value.trim(),
+        title: document.getElementById('charTitle').value.trim(),
+        universe: document.getElementById('charUniverse').value.trim() || 'Universo Livre',
+        relation: document.getElementById('charRelation').value.trim(),
+        shortBio: document.getElementById('charShortBio').value.trim(),
+        personality: document.getElementById('charPersonality').value.trim(),
+        backstory: document.getElementById('charBackstory').value.trim(),
+        scenario: document.getElementById('charScenario').value.trim(),
+        greeting: document.getElementById('charGreeting').value.trim(),
+        speechStyle: document.getElementById('charSpeechStyle').value.trim(),
+        avatar: avatarSrc,
+        tags: selectedTags.length ? selectedTags : ["Fantasia"],
+        isAdult: document.getElementById('charIsAdult').checked,
+        isPublic: document.getElementById('charIsPublic').checked,
+        createdAt: Date.now()
+      };
+
+      if (editingId) {
+        const idx = appState.characters.findIndex(c => c.id === editingId);
+        if (idx !== -1) appState.characters[idx] = newChar;
+      } else {
+        appState.characters.unshift(newChar);
+      }
+
+      saveStateToStorage();
+      resetCreatorForm();
+      switchTab('explorar');
+      renderCharacters();
+    }
+
+    function resetCreatorForm() {
+      document.getElementById('characterCreateForm').reset();
+      document.getElementById('editingCharId').value = "";
+      document.getElementById('avatarPreviewContainer').innerHTML = `
+        <i data-lucide="image" class="w-8 h-8 mb-1 opacity-60"></i>
+        <span class="text-[10px]">Imagem</span>
+      `;
+      delete document.getElementById('avatarPreviewContainer').dataset.avatarSrc;
+      lucide.createIcons();
+    }
+
+    /* ==========================================================================
+       TAB 2: COMUNIDADE FEED
+       ========================================================================== */
+
+    function filterFeed(category) {
+      appState.activeFeedCategory = category;
+      document.querySelectorAll('.feed-tab-btn').forEach(btn => {
+        if (btn.dataset.feed === category) {
+          btn.className = "feed-tab-btn px-3 py-1.5 rounded-lg bg-dream-accent text-white font-medium";
+        } else {
+          btn.className = "feed-tab-btn px-3 py-1.5 rounded-lg bg-dream-surface text-dream-textMuted hover:text-white";
+        }
+      });
+      renderCommunityFeed();
+    }
+
+    function renderCommunityFeed() {
+      const list = document.getElementById('communityFeedList');
+      const filtered = appState.communityPosts.filter(p => 
+        appState.activeFeedCategory === 'tudo' || p.category === appState.activeFeedCategory
+      );
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="p-8 text-center text-dream-textMuted text-xs">Nenhuma publicação nesta categoria ainda.</div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map(post => `
+        <div class="glass-card rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+              <img src="${post.authorAvatar}" class="w-8 h-8 rounded-full object-cover border border-dream-accent" />
+              <div>
+                <h4 class="text-xs font-semibold text-white">${post.authorName}</h4>
+                <span class="text-[10px] text-dream-textMuted">${post.category}</span>
+              </div>
+            </div>
+            ${post.charName ? `
+              <button onclick="openChatOverlay('${post.charId}')" class="px-2.5 py-1 rounded-lg bg-dream-surface border border-dream-border text-[11px] text-dream-lilac hover:bg-dream-card flex items-center gap-1">
+                <i data-lucide="message-square" class="w-3 h-3 text-dream-accent"></i> ${post.charName}
+              </button>
+            ` : ''}
+          </div>
+
+          <p class="text-xs text-dream-text leading-relaxed">${post.content}</p>
+
+          ${post.imageUrl ? `
+            <div class="rounded-xl overflow-hidden max-h-60 bg-dream-card border border-dream-border">
+              <img src="${post.imageUrl}" class="w-full h-full object-cover" />
+            </div>
+          ` : ''}
+
+          <div class="flex items-center justify-between pt-2 border-t border-dream-border/50 text-xs text-dream-textMuted">
+            <button onclick="toggleLikePost('${post.id}')" class="flex items-center gap-1.5 hover:text-dream-accent transition">
+              <i data-lucide="heart" class="w-4 h-4 ${post.isLiked ? 'fill-dream-accent text-dream-accent' : ''}"></i> ${post.likes}
+            </button>
+            <span class="text-[10px]">Dreamora Feed</span>
+          </div>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    function toggleLikePost(postId) {
+      const post = appState.communityPosts.find(p => p.id === postId);
+      if (post) {
+        post.isLiked = !post.isLiked;
+        post.likes += post.isLiked ? 1 : -1;
+        saveStateToStorage();
+        renderCommunityFeed();
+      }
+    }
+
+    function openCreatePostModal() {
+      const select = document.getElementById('postCharSelect');
+      select.innerHTML = '<option value="">Nenhum personagem vinculado</option>' + 
+        appState.characters.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      
+      document.getElementById('createPostModal').classList.remove('hidden');
+    }
+
+    function closeCreatePostModal() {
+      document.getElementById('createPostModal').classList.add('hidden');
+    }
+
+    function handleSaveCommunityPost() {
+      const content = document.getElementById('postContentInput').value.trim();
+      if (!content) return;
+
+      const charId = document.getElementById('postCharSelect').value;
+      const char = appState.characters.find(c => c.id === charId);
+
+      const newPost = {
+        id: `post-${Date.now()}`,
+        authorName: appState.userProfile.name,
+        authorAvatar: appState.userProfile.avatar,
+        category: document.getElementById('postCategorySelect').value,
+        charId: charId || null,
+        charName: char ? char.name : null,
+        content: content,
+        imageUrl: document.getElementById('postImageUrlInput').value.trim(),
+        likes: 1,
+        isLiked: true
+      };
+
+      appState.communityPosts.unshift(newPost);
+      saveStateToStorage();
+      closeCreatePostModal();
+      renderCommunityFeed();
+    }
+
+    /* ==========================================================================
+       TAB 4: PERFIL & SUBTABS
+       ========================================================================== */
+
+    function switchProfileTab(ptab) {
+      appState.activeProfileSubtab = ptab;
+      document.querySelectorAll('.profile-tab-btn').forEach(btn => {
+        if (btn.dataset.ptab === ptab) {
+          btn.className = "profile-tab-btn px-4 py-2 border-b-2 border-dream-accent text-dream-lilac font-semibold";
+        } else {
+          btn.className = "profile-tab-btn px-4 py-2 text-dream-textMuted hover:text-white";
+        }
+      });
+
+      document.querySelectorAll('.profile-subtab').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`ptab-${ptab}`).classList.remove('hidden');
+
+      renderProfileView();
+    }
+
+    function renderProfileView() {
+      document.getElementById('userProfileAvatar').src = appState.userProfile.avatar;
+      document.getElementById('userProfileName').textContent = appState.userProfile.name;
+      document.getElementById('userProfileBio').textContent = appState.userProfile.bio;
+
+      const ptab = appState.activeProfileSubtab;
+
+      if (ptab === 'chats') {
+        const activeContainer = document.getElementById('activeChatsList');
+        const activeCharIds = Object.keys(appState.chats);
+
+        if (activeCharIds.length === 0) {
+          activeContainer.innerHTML = `<p class="text-xs text-dream-textMuted text-center py-6">Você ainda não tem conversas ativas. Explore personagens e inicie seu primeiro chat!</p>`;
+          return;
+        }
+
+        activeContainer.innerHTML = activeCharIds.map(charId => {
+          const char = appState.characters.find(c => c.id === charId);
+          if (!char) return '';
+
+          const chatData = appState.chats[charId];
+          const lastMsg = chatData.history[chatData.history.length - 1];
+
+          return `
+            <div onclick="openChatOverlay('${char.id}')" class="glass-card rounded-2xl p-3 flex items-center justify-between cursor-pointer hover:bg-dream-card transition">
+              <div class="flex items-center space-x-3">
+                <img src="${char.avatar}" class="w-12 h-12 rounded-xl object-cover border border-dream-accent" />
+                <div>
+                  <h4 class="font-cinzel font-bold text-sm text-white">${char.name}</h4>
+                  <p class="text-xs text-dream-textMuted line-clamp-1">${lastMsg ? lastMsg.text : 'Sem mensagens'}</p>
+                </div>
+              </div>
+              <i data-lucide="chevron-right" class="w-4 h-4 text-dream-textMuted"></i>
+            </div>
+          `;
+        }).join('');
+      } else if (ptab === 'criados') {
+        const container = document.getElementById('ptab-criados');
+        const customChars = appState.characters.filter(c => !c.isDefault);
+
+        if (customChars.length === 0) {
+          container.innerHTML = `<p class="col-span-full text-xs text-dream-textMuted text-center py-6">Você ainda não criou nenhum personagem. Vá na aba CRIAR!</p>`;
+          return;
+        }
+
+        container.innerHTML = customChars.map(char => `
+          <div class="glass-card rounded-xl p-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <img src="${char.avatar}" class="w-10 h-10 rounded-lg object-cover" />
+              <div>
+                <h5 class="text-xs font-bold text-white">${char.name}</h5>
+                <span class="text-[10px] text-dream-textMuted">${char.universe}</span>
+              </div>
+            </div>
+            <button onclick="openChatOverlay('${char.id}')" class="px-2.5 py-1 bg-dream-accent text-white text-xs rounded-lg">Chat</button>
+          </div>
+        `).join('');
+      } else if (ptab === 'favoritos') {
+        const container = document.getElementById('ptab-favoritos');
+        const favChars = appState.characters.filter(c => appState.favorites.includes(c.id));
+
+        if (favChars.length === 0) {
+          container.innerHTML = `<p class="col-span-full text-xs text-dream-textMuted text-center py-6">Nenhum personagem favoritado ainda.</p>`;
+          return;
+        }
+
+        container.innerHTML = favChars.map(char => `
+          <div class="glass-card rounded-xl p-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <img src="${char.avatar}" class="w-10 h-10 rounded-lg object-cover" />
+              <div>
+                <h5 class="text-xs font-bold text-white">${char.name}</h5>
+                <span class="text-[10px] text-dream-textMuted">${char.title || char.universe}</span>
+              </div>
+            </div>
+            <button onclick="openChatOverlay('${char.id}')" class="px-2.5 py-1 bg-dream-accent text-white text-xs rounded-lg">Chat</button>
+          </div>
+        `).join('');
+      } else if (ptab === 'personas') {
+        renderPersonasList();
+      }
+
+      lucide.createIcons();
+    }
+
+    /* ==========================================================================
+       USER PERSONAS MANAGEMENT
+       ========================================================================== */
+
+    function renderPersonasList() {
+      const container = document.getElementById('userPersonasList');
+      container.innerHTML = appState.personas.map(p => {
+        const isActive = p.id === appState.activePersonaId;
+        return `
+          <div class="glass-card rounded-xl p-3 flex items-center justify-between">
+            <div>
+              <h5 class="text-xs font-bold text-white flex items-center gap-1.5">
+                ${p.name} ${isActive ? '<span class="text-[9px] bg-dream-accent text-white px-1.5 py-0.2 rounded">Ativa</span>' : ''}
+              </h5>
+              <p class="text-[10px] text-dream-textMuted">${p.bio || 'Sem descrição.'}</p>
+            </div>
+            ${!isActive ? `
+              <button onclick="setActivePersona('${p.id}')" class="px-2.5 py-1 bg-dream-surface border border-dream-border text-xs text-dream-lilac rounded-lg hover:bg-dream-card">Usar</button>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function setActivePersona(personaId) {
+      appState.activePersonaId = personaId;
+      saveStateToStorage();
+      updateActivePersonaHeader();
+      renderProfileView();
+      closePersonaModal();
+    }
+
+    function updateActivePersonaHeader() {
+      const active = appState.personas.find(p => p.id === appState.activePersonaId) || appState.personas[0];
+      if (active) {
+        document.getElementById('activePersonaHeaderName').textContent = active.name;
+        document.getElementById('chatActivePersonaLabel').textContent = active.name;
+      }
+    }
+
+    function openPersonaModal() {
+      const container = document.getElementById('personaModalList');
+      container.innerHTML = appState.personas.map(p => {
+        const isActive = p.id === appState.activePersonaId;
+        return `
+          <div onclick="setActivePersona('${p.id}')" class="p-3 rounded-xl border ${isActive ? 'border-dream-accent bg-dream-accent/10' : 'border-dream-border bg-dream-card'} cursor-pointer flex justify-between items-center">
+            <div>
+              <h5 class="text-xs font-bold text-white">${p.name}</h5>
+              <p class="text-[10px] text-dream-textMuted">${p.bio || ''}</p>
+            </div>
+            ${isActive ? '<i data-lucide="check" class="w-4 h-4 text-dream-accent"></i>' : ''}
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('personaModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closePersonaModal() {
+      document.getElementById('personaModal').classList.add('hidden');
+    }
+
+    function openCreatePersonaModal() {
+      closePersonaModal();
+      document.getElementById('createPersonaModal').classList.remove('hidden');
+    }
+
+    function closeCreatePersonaModal() {
+      document.getElementById('createPersonaModal').classList.add('hidden');
+    }
+
+    function handleSavePersona() {
+      const name = document.getElementById('personaNameInput').value.trim();
+      if (!name) return;
+
+      const newP = {
+        id: `persona-${Date.now()}`,
+        name: name,
+        bio: document.getElementById('personaBioInput').value.trim()
+      };
+
+      appState.personas.push(newP);
+      appState.activePersonaId = newP.id;
+      saveStateToStorage();
+      updateActivePersonaHeader();
+      closeCreatePersonaModal();
+      renderProfileView();
+    }
+
+    /* ==========================================================================
+       CHAT ENGINE & HYBRID AI RESPONSE SYSTEM
+       ========================================================================== */
+
+    function openChatOverlay(charId) {
+      const char = appState.characters.find(c => c.id === charId);
+      if (!char) return;
+
+      appState.activeChatCharId = charId;
+
+      // Initialize chat data if non-existent
+      if (!appState.chats[charId]) {
+        appState.chats[charId] = {
+          narrativeStyle: 'balanced',
+          history: [
+            {
+              id: `msg-0`,
+              sender: 'character',
+              text: char.greeting,
+              timestamp: Date.now()
+            }
+          ]
+        };
+        saveStateToStorage();
+      }
+
+      // Populate Header Info
+      document.getElementById('chatCharAvatar').src = char.avatar;
+      document.getElementById('chatCharName').textContent = char.name;
+      document.getElementById('chatCharUniverse').textContent = `${char.universe} • ${char.title || ''}`;
+      document.getElementById('chatCharRatingBadge').classList.toggle('hidden', !char.isAdult);
+      document.getElementById('chatNarrativeStyle').value = appState.chats[charId].narrativeStyle || 'balanced';
+
+      updateActivePersonaHeader();
+      renderChatStream();
+
+      document.getElementById('chatOverlay').classList.remove('hidden');
+      scrollToLatestMessage();
+      lucide.createIcons();
+    }
+
+    function closeChatOverlay() {
+      document.getElementById('chatOverlay').classList.add('hidden');
+      document.getElementById('chatMenuDropdown').classList.add('hidden');
+      appState.activeChatCharId = null;
+    }
+
+    function toggleChatMenu() {
+      document.getElementById('chatMenuDropdown').classList.toggle('hidden');
+    }
+
+    function updateNarrativeStyle(style) {
+      if (appState.activeChatCharId && appState.chats[appState.activeChatCharId]) {
+        appState.chats[appState.activeChatCharId].narrativeStyle = style;
+        saveStateToStorage();
+      }
+    }
+
+    function renderChatStream() {
+      const charId = appState.activeChatCharId;
+      if (!charId) return;
+
+      const char = appState.characters.find(c => c.id === charId);
+      const chatData = appState.chats[charId];
+      const stream = document.getElementById('chatMessagesStream');
+
+      stream.innerHTML = chatData.history.map((msg, idx) => {
+        const isUser = msg.sender === 'user';
+        return `
+          <div class="flex items-start gap-2.5 ${isUser ? 'flex-row-reverse' : ''}">
+            ${!isUser ? `
+              <img src="${char.avatar}" class="w-8 h-8 rounded-xl object-cover border border-dream-accent shrink-0 mt-1" />
+            ` : ''}
+
+            <div class="group relative max-w-[82%] sm:max-w-[70%]">
+              <div class="p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-md ${
+                isUser 
+                  ? 'bg-gradient-to-r from-dream-accent to-purple-800 text-white rounded-tr-none' 
+                  : 'glass-card text-dream-text rounded-tl-none border-dream-border'
+              }">
+                ${formatDialogueText(msg.text)}
+              </div>
+
+              <!-- Message Actions -->
+              <div class="absolute top-1 ${isUser ? '-left-12' : '-right-12'} opacity-0 group-hover:opacity-100 transition flex items-center space-x-1">
+                <button onclick="copyMessageText('${msg.id}')" class="p-1 rounded bg-dream-card border border-dream-border text-dream-textMuted hover:text-white" title="Copiar">
+                  <i data-lucide="copy" class="w-3 h-3"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      scrollToLatestMessage();
+      lucide.createIcons();
+    }
+
+    function formatDialogueText(text) {
+      // Italicize action narrative between asterisks (*text*)
+      return text.replace(/\*([^*]+)\*/g, '<em class="text-dream-lilac font-serif italic">$1</em>');
+    }
+
+    function scrollToLatestMessage() {
+      const stream = document.getElementById('chatMessagesStream');
+      setTimeout(() => {
+        stream.scrollTop = stream.scrollHeight;
+      }, 50);
+    }
+
+    function handleChatKeyDown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSendChatMessage(e);
+      }
+    }
+
+    async function handleSendChatMessage(e) {
+      if (e) e.preventDefault();
+
+      const input = document.getElementById('chatInputText');
+      const text = input.value.trim();
+      if (!text || !appState.activeChatCharId) return;
+
+      const charId = appState.activeChatCharId;
+      const chatData = appState.chats[charId];
+
+      // Append User Message
+      chatData.history.push({
+        id: `msg-${Date.now()}`,
+        sender: 'user',
+        text: text,
+        timestamp: Date.now()
+      });
+
+      input.value = "";
+      saveStateToStorage();
+      renderChatStream();
+
+      // Trigger AI Response
+      await generateAIResponse(charId);
+    }
+
+    async function handleContinueStory() {
+      if (!appState.activeChatCharId) return;
+      await generateAIResponse(appState.activeChatCharId, "Continue a narrativa e desenvolva o momento.");
+    }
+
+    async function handleRegenerateResponse() {
+      const charId = appState.activeChatCharId;
+      if (!charId) return;
+
+      const chatData = appState.chats[charId];
+      if (chatData.history.length > 1) {
+        // Remove last character response if present
+        if (chatData.history[chatData.history.length - 1].sender === 'character') {
+          chatData.history.pop();
+        }
+        saveStateToStorage();
+        renderChatStream();
+        await generateAIResponse(charId);
+      }
+    }
+
+    /* ==========================================================================
+       HYBRID AI GENERATOR ENGINE
+       ========================================================================== */
+
+    async function generateAIResponse(charId, systemPromptOverride) {
+      const char = appState.characters.find(c => c.id === charId);
+      const chatData = appState.chats[charId];
+      const activePersona = appState.personas.find(p => p.id === appState.activePersonaId) || appState.personas[0];
+
+      // Show Typing Indicator
+      const typingEl = document.getElementById('chatTypingIndicator');
+      document.getElementById('typingCharName').textContent = `${char.name} está pensando...`;
+      typingEl.classList.remove('hidden');
+      scrollToLatestMessage();
+
+      const apiKey = appState.settings.geminiApiKey;
+
+      if (apiKey) {
+        // LIVE GEMINI API RESPONSE
+        try {
+          const style = chatData.narrativeStyle || 'balanced';
+          const systemInstruction = `Você é um bot de roleplay ficional chamado "${char.name}". 
+Título: ${char.title || 'Nenhum'}
+Universo: ${char.universe}
+Personalidade: ${char.personality}
+Cenário Atual: ${char.scenario}
+Estilo de Fala: ${char.speechStyle}
+Interagindo com a Persona de Usuário: "${activePersona.name}" (${activePersona.bio || 'Viajante'}).
+Instruções da Narrativa: Responda em Português Brasileiro. ${style === 'short' ? 'Mantenha a resposta curta e direta.' : style === 'detailed' ? 'Forneça uma resposta detalhada em estilo romance/novel de alta fantasia.' : 'Responda de forma equilibrada.'} Use asteriscos para narrar ações (*olha friamente*). Mantenha a coerência.`;
+
+          const contents = chatData.history.slice(-8).map(m => ({
+            role: m.sender === 'user' ? 'user' : 'model',
+            parts: [{ text: m.text }]
+          }));
+
+          if (systemPromptOverride) {
+            contents.push({ role: 'user', parts: [{ text: systemPromptOverride }] });
+          }
+
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: contents,
+              systemInstruction: { parts: [{ text: systemInstruction }] }
+            })
+          });
+
+          const data = await response.json();
+          const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || generateLocalFallbackReply(char, chatData, activePersona);
+
+          chatData.history.push({
+            id: `msg-${Date.now()}`,
+            sender: 'character',
+            text: replyText,
+            timestamp: Date.now()
+          });
+
+        } catch (err) {
+          console.warn("Erro ao chamar API externa. Usando engine local...", err);
+          chatData.history.push({
+            id: `msg-${Date.now()}`,
+            sender: 'character',
+            text: generateLocalFallbackReply(char, chatData, activePersona),
+            timestamp: Date.now()
+          });
+        }
+      } else {
+        // LOCAL ZERO-COST SIMULATION ENGINE
+        await new Promise(res => setTimeout(res, 1200)); // Realistic delay
+
+        const replyText = generateLocalFallbackReply(char, chatData, activePersona);
+        chatData.history.push({
+          id: `msg-${Date.now()}`,
+          sender: 'character',
+          text: replyText,
+          timestamp: Date.now()
+        });
+      }
+
+      typingEl.classList.add('hidden');
+      saveStateToStorage();
+      renderChatStream();
+    }
+
+    function generateLocalFallbackReply(char, chatData, persona) {
+      const lastUserMsg = [...chatData.history].reverse().find(m => m.sender === 'user')?.text || "";
+      const lower = lastUserMsg.toLowerCase();
+
+      // Dynamic Context Pattern Rules based on character personality
+      if (lower.includes('quem é você') || lower.includes('seu nome')) {
+        return `*${char.name} inclina levemente a cabeça, surpreso com sua indagação.* — Eu sou ${char.name}, ${char.title || 'um ser deste reino'}. E você está diante do meu domínio.`;
+      }
+
+      if (lower.includes('olá') || lower.includes('oi') || lower.includes('saudações')) {
+        return `*${char.name} observa ${persona.name} fixamente por alguns segundos antes de responder.* — Saudações, ${persona.name}. O que o traz até o cenário de ${char.universe}?`;
+      }
+
+      if (lower.includes('segredo') || lower.includes('passado')) {
+        return `*Os olhos de ${char.name} se estreitam e o clima ao redor torna-se mais denso.* — Poucos ousam perguntar sobre minha história. O que você realmente deseja saber, ${persona.name}?`;
+      }
+
+      // Default Lore Variations
+      const dynamicPhrases = [
+        `*${char.name} dá um passo à frente, ajustando a postura enquanto avalia a fala de ${persona.name}.* — Suas palavras revelam mais do que você imagina. Neste cenário de ${char.universe}, cada escolha tem seu preço.`,
+        `*Um silêncio tenso paira no ar por um momento antes que ${char.name} solte um leve suspiro.* — Interessante abordagem, ${persona.name}. Contudo, você não deve subestimar os perigos que nos cercam.`,
+        `*${char.name} cruza os braços e deixa escapar um sorriso enigmático.* — Você fala com audácia. Gostaria de ver até onde vai essa sua determinação.`
+      ];
+
+      return dynamicPhrases[Math.floor(Math.random() * dynamicPhrases.length)];
+    }
+
+    function copyMessageText(msgId) {
+      const charId = appState.activeChatCharId;
+      if (!charId) return;
+
+      const msg = appState.chats[charId].history.find(m => m.id === msgId);
+      if (msg) {
+        navigator.clipboard.writeText(msg.text);
+      }
+    }
+
+    function clearChatHistory() {
+      const charId = appState.activeChatCharId;
+      if (!charId) return;
+
+      const char = appState.characters.find(c => c.id === charId);
+      appState.chats[charId].history = [
+        {
+          id: `msg-0`,
+          sender: 'character',
+          text: char.greeting,
+          timestamp: Date.now()
+        }
+      ];
+
+      saveStateToStorage();
+      renderChatStream();
+      toggleChatMenu();
+    }
+
+    function exportChatLog() {
+      const charId = appState.activeChatCharId;
+      if (!charId) return;
+
+      const chatData = appState.chats[charId];
+      const blob = new Blob([JSON.stringify(chatData.history, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dreamora-chat-${charId}.json`;
+      a.click();
+      toggleChatMenu();
+    }
+
+    function showScenarioModal() {
+      const charId = appState.activeChatCharId;
+      if (!charId) return;
+      const char = appState.characters.find(c => c.id === charId);
+      document.getElementById('scenarioModalText').textContent = char.scenario || "Sem cenário definido.";
+      document.getElementById('scenarioModal').classList.remove('hidden');
+    }
+
+    function closeScenarioModal() {
+      document.getElementById('scenarioModal').classList.add('hidden');
+    }
+
+    /* ==========================================================================
+       SETTINGS & PREFERENCES
+       ========================================================================== */
+
+    function openSettingsModal() {
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    function toggleAdultPreference(checked) {
+      appState.settings.allowAdult = checked;
+    }
+
+    function saveSettings() {
+      appState.settings.allowAdult = document.getElementById('settingAdultToggle').checked;
+      appState.settings.allowProfanity = document.getElementById('settingProfanityToggle').checked;
+      appState.settings.geminiApiKey = document.getElementById('geminiApiKeyInput').value.trim();
+
+      saveStateToStorage();
+      closeSettingsModal();
+      renderCharacters();
+    }
+
+    function exportAllData() {
+      const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dreamora-backup-completo.json`;
+      a.click();
+    }
+
+    function openEditProfileModal() {
+      const newName = prompt("Digite seu novo nome de exibição:", appState.userProfile.name);
+      if (newName) {
+        appState.userProfile.name = newName;
+        const newBio = prompt("Digite sua biografia:", appState.userProfile.bio);
+        if (newBio) appState.userProfile.bio = newBio;
+        saveStateToStorage();
+        renderProfileView();
+      }
+    }
+
+    /* ==========================================================================
+       CANVAS BACKGROUND ANIMATION (STARFIELD)
+       ========================================================================== */
+
+    function initStarfieldCanvas() {
+      const canvas = document.getElementById('starfield');
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        stars = Array.from({ length: 70 }, () => ({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 1.5 + 0.5,
+          alpha: Math.random(),
+          speed: Math.random() * 0.01 + 0.005
+        }));
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => {
+          s.alpha += s.speed;
+          if (s.alpha > 1 || s.alpha < 0) s.speed = -s.speed;
+          ctx.fillStyle = `rgba(216, 180, 254, ${Math.abs(s.alpha) * 0.6})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    }
+  </script>
+</body>
+</html>
+```
